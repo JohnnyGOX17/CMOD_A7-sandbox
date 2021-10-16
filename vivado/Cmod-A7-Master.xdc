@@ -1,12 +1,14 @@
 ### XDC for the CmodA7 rev. B
 
 ## 12 MHz Clock Signal
-set_property -dict { PACKAGE_PIN L17   IOSTANDARD LVCMOS33 } [get_ports { gclk }]; #IO_L12P_T1_MRCC_14 Sch=gclk
-create_clock -add -name sys_clk_pin -period 83.33 -waveform {0 41.66} [get_ports {gclk}];
+set_property -dict {PACKAGE_PIN L17 IOSTANDARD LVCMOS33} [get_ports gclk]
+create_clock -period 83.330 -name sys_clk -waveform {0.000 41.660} -add [get_ports gclk]
 
 ## LEDs
-set_property -dict { PACKAGE_PIN A17   IOSTANDARD LVCMOS33 } [get_ports { led0 }]; #IO_L12N_T1_MRCC_16 Sch=led[1]
-set_property -dict { PACKAGE_PIN C16   IOSTANDARD LVCMOS33 } [get_ports { led1 }]; #IO_L13P_T2_MRCC_16 Sch=led[2]
+set_property -dict {PACKAGE_PIN A17 IOSTANDARD LVCMOS33} [get_ports led0]
+#set_false_path -from [get_clocks sys_clk] -to [get_ports led0]
+set_property -dict {PACKAGE_PIN C16 IOSTANDARD LVCMOS33} [get_ports led1]
+#set_false_path -from [get_clocks sys_clk] -to [get_ports led1]
 
 ## RGB LED
 #set_property -dict { PACKAGE_PIN B17   IOSTANDARD LVCMOS33 } [get_ports { led0_b }]; #IO_L14N_T2_SRCC_16 Sch=led0_b
@@ -14,7 +16,8 @@ set_property -dict { PACKAGE_PIN C16   IOSTANDARD LVCMOS33 } [get_ports { led1 }
 #set_property -dict { PACKAGE_PIN C17   IOSTANDARD LVCMOS33 } [get_ports { led0_r }]; #IO_L14P_T2_SRCC_16 Sch=led0_r
 
 ## Buttons
-set_property -dict { PACKAGE_PIN A18   IOSTANDARD LVCMOS33 } [get_ports { reset }]; #IO_L19N_T3_VREF_16 Sch=btn[0]
+set_property -dict {PACKAGE_PIN A18 IOSTANDARD LVCMOS33} [get_ports reset]
+#set_false_path -from [get_ports reset] -to [all_registers]
 #set_property -dict { PACKAGE_PIN B18   IOSTANDARD LVCMOS33 } [get_ports { btn[1] }]; #IO_L19P_T3_16 Sch=btn[1]
 
 ## Pmod Header JA
@@ -82,8 +85,8 @@ set_property -dict { PACKAGE_PIN A18   IOSTANDARD LVCMOS33 } [get_ports { reset 
 #set_property -dict { PACKAGE_PIN V8    IOSTANDARD LVCMOS33 } [get_ports { pio48 }]; #IO_L14N_T2_SRCC_34 Sch=pio[48]
 
 ## UART
-#set_property -dict { PACKAGE_PIN J18   IOSTANDARD LVCMOS33 } [get_ports { uart_rxd_out }]; #IO_L7N_T1_D10_14 Sch=uart_rxd_out
-#set_property -dict { PACKAGE_PIN J17   IOSTANDARD LVCMOS33 } [get_ports { uart_txd_in  }]; #IO_L7P_T1_D09_14 Sch=uart_txd_in
+set_property -dict {PACKAGE_PIN J18 IOSTANDARD LVCMOS33} [get_ports uart_tx]
+set_property -dict {PACKAGE_PIN J17 IOSTANDARD LVCMOS33} [get_ports uart_rx]
 
 ## Crypto 1 Wire Interface
 #set_property -dict { PACKAGE_PIN D17   IOSTANDARD LVCMOS33 } [get_ports { crypto_sda }]; #IO_0_14 Sch=crypto_sda
@@ -126,4 +129,3 @@ set_property -dict { PACKAGE_PIN A18   IOSTANDARD LVCMOS33 } [get_ports { reset 
 #set_property -dict { PACKAGE_PIN P19   IOSTANDARD LVCMOS33 } [get_ports { RamOEn     }]; #IO_L10P_T1_D14_14 Sch=sram-oe
 #set_property -dict { PACKAGE_PIN R19   IOSTANDARD LVCMOS33 } [get_ports { RamWEn     }]; #IO_L10N_T1_D15_14 Sch=sram-we
 #set_property -dict { PACKAGE_PIN N19   IOSTANDARD LVCMOS33 } [get_ports { RamCEn     }]; #IO_L9N_T1_DQS_D13_14 Sch=sram-ce
-

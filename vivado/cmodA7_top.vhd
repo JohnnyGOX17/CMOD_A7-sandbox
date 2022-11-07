@@ -26,7 +26,7 @@ end entity cmodA7_top;
 
 architecture rtl of cmodA7_top is
 
-  constant K_MAX_COUNT : integer := 12501; -- max counter value supported
+  constant K_MAX_COUNT : integer := 1501; -- max counter value supported
 
   signal gclk_bufg     : std_logic;
 
@@ -46,8 +46,15 @@ architecture rtl of cmodA7_top is
 
 begin
 
-  sig_cnt_val0 <= std_logic_vector( to_unsigned( 12500, sig_cnt_val0'length ) );
-  sig_cnt_val1 <= std_logic_vector( to_unsigned( 12487, sig_cnt_val1'length ) );
+  -- Given a 12 MHz (~83.3ns period) clock, and a /4 internal clock (3MHz eff.)
+  -- a target 2 kHz PWM frequency (fast enough for no LED flicker for example,
+  -- but more than slow enough for most LED driver circuits) can be achieved
+  -- by a counter which rolls over after (3M/2k) = 1500 cycles.
+  -- To have a fairly slow beat frequency (e.g. 1Hz), which is found by the
+  -- difference of two counter frequencies (f1 - f2)/2, we can find the counter
+  -- value of 3M/2002 ~= 1499 to be the second counter term value.
+  sig_cnt_val0 <= std_logic_vector( to_unsigned(1500, sig_cnt_val0'length) );
+  sig_cnt_val1 <= std_logic_vector( to_unsigned(1499, sig_cnt_val1'length) );
 
   led1 <= sys_reset;
   sys_reset_n <= not sys_reset;

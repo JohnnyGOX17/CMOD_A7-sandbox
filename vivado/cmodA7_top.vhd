@@ -1,6 +1,8 @@
 library ieee;
   use ieee.std_logic_1164.all;
   use ieee.numeric_std.all;
+library unisim;
+  use unisim.vcomponents.all;
 library work;
   use work.util_pkg.all;
 
@@ -9,7 +11,8 @@ entity cmodA7_top is
     G_BAUD_RATE   : positive              := 9600;      -- UART Baud rate
     G_CHAR_WIDTH  : positive range 5 to 8 := 8;         -- character data width
     G_PARITY      : string                := "NONE";    -- "NONE", "ODD", or "EVEN" parity
-    G_DBL_STOP    : boolean               := false      -- when true use two stop bits, else one stop bit
+    G_DBL_STOP    : boolean               := false;     -- when true use two stop bits, else one stop bit
+    G_DEBUG       : string                := "true"     -- feeds synth attributes
   );
   port (
     gclk          : in  std_logic; -- 12 MHz input
@@ -25,18 +28,21 @@ architecture rtl of cmodA7_top is
 
   constant K_MAX_COUNT : integer := 12501; -- max counter value supported
 
+  signal gclk_bufg     : std_logic;
 
   signal sig_cnt_val0  : std_logic_vector(F_clog2(K_MAX_COUNT) - 1 downto 0);
   signal sig_cnt_val1  : std_logic_vector(F_clog2(K_MAX_COUNT) - 1 downto 0);
   signal sys_reset     : std_logic;
   signal sys_reset_n   : std_logic;
 
-  signal sig_tx_axis_tdata  : std_logic_vector(G_CHAR_WIDTH - 1 downto 0);
-  signal sig_tx_axis_tvalid : std_logic;
-  signal sig_tx_axis_tready : std_logic;
-  signal sig_rx_axis_tdata  : std_logic_vector(G_CHAR_WIDTH - 1 downto 0);
-  signal sig_rx_axis_tvalid : std_logic;
-  signal sig_rx_axis_tready : std_logic;
+  signal sig_axis_tdata  : std_logic_vector(G_CHAR_WIDTH - 1 downto 0);
+  signal sig_axis_tvalid : std_logic;
+  signal sig_axis_tready : std_logic;
+
+  attribute mark_debug : string;
+  attribute mark_debug of sig_axis_tdata  : signal is G_DEBUG;
+  attribute mark_debug of sig_axis_tvalid : signal is G_DEBUG;
+  attribute mark_debug of sig_axis_tready : signal is G_DEBUG;
 
 begin
 
@@ -46,12 +52,18 @@ begin
   led1 <= sys_reset;
   sys_reset_n <= not sys_reset;
 
+  U_clk_input_buffer: BUFG
+    port map (
+      I => gclk,
+      O => gclk_bufg
+    );
+
   U_reg_reset: entity work.synchronizer_reg
     generic map (
       G_NUM_REG => 3
     )
     port map (
-      clk       => gclk,
+      clk       => gclk_bufg,
       din       => reset,
       dout      => sys_reset
     );
@@ -62,24 +74,12 @@ begin
       G_FREQ_DIV  => 4
     )
     port map (
-      clk         => gclk,
+      clk         => gclk_bufg,
       reset       => sys_reset,
       cnt_val0    => sig_cnt_val0,
       cnt_val1    => sig_cnt_val1,
       cnt_val_vld => '1',
       pwm_out     => led0
-    );
-
-  U_FIFO: entity work.axis_data_fifo_0
-    port map (
-      s_axis_aresetn => sys_reset_n,
-      s_axis_aclk    => gclk,
-      s_axis_tvalid  => sig_rx_axis_tvalid,
-      s_axis_tready  => sig_rx_axis_tready,
-      s_axis_tdata   => sig_rx_axis_tdata,
-      m_axis_tvalid  => sig_tx_axis_tvalid,
-      m_axis_tready  => sig_tx_axis_tready,
-      m_axis_tdata   => sig_tx_axis_tdata
     );
 
   U_UART: entity work.UART_top
@@ -91,17 +91,17 @@ begin
       G_DBL_STOP    => G_DBL_STOP
     )
     port map (
-      aclk          => gclk,
+      aclk          => gclk_bufg,
       aresetn       => sys_reset_n,
 
       -- character input
-      s_axis_tdata  => sig_tx_axis_tdata,
-      s_axis_tvalid => sig_tx_axis_tvalid,
-      s_axis_tready => sig_tx_axis_tready,
+      s_axis_tdata  => sig_axis_tdata,
+      s_axis_tvalid => sig_axis_tvalid,
+      s_axis_tready => sig_axis_tready,
       -- character output
-      m_axis_tdata  => sig_rx_axis_tdata,
-      m_axis_tvalid => sig_rx_axis_tvalid,
-      m_axis_tready => sig_rx_axis_tready,
+      m_axis_tdata  => sig_axis_tdata,
+      m_axis_tvalid => sig_axis_tvalid,
+      m_axis_tready => sig_axis_tready,
 
       parity_error  => open,
       uart_rx       => uart_rx,

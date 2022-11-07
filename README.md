@@ -10,6 +10,10 @@ In Vivado TCL console:
 
 For more info, see [Xilinx AR 56421](https://support.xilinx.com/s/article/56421?language=en_US)
 
+## UART Loopback Project
+
+Connect with built baud rate, like `sudo minicom -D /dev/ttyUSB1 -b 9600`.
+
 ## References
 
 * [Cmod A7 - Digilent Reference](https://digilent.com/reference/programmable-logic/cmod-a7/start)

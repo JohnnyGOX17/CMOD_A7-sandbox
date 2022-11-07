@@ -1,4 +1,10 @@
 ### XDC for the CmodA7 rev. B
+## Set Configuration Bank Voltage Select
+set_property CFGBVS VCCO [current_design]
+set_property CONFIG_VOLTAGE 3.3 [current_design]
+## Compress bitstream for faster programming
+set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]
+
 
 ## 12 MHz Clock Signal
 set_property -dict {PACKAGE_PIN L17 IOSTANDARD LVCMOS33} [get_ports gclk]
